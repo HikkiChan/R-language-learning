@@ -1,8 +1,8 @@
-###########Анализ данных в R###############
+##########Data analysis with R##############
 
-#############Первая неделя#################
+#############First week#################
 
-#Переменные
+#Variables
 my_number <- 42
 my_logical_var <- TRUE
 
@@ -25,7 +25,7 @@ my_sum <- sum(my_vector[my_vector > 10])
 my_vector_2 <- my_vector[abs(my_vector-mean(my_vector)) < sd(my_vector)]
 
 
-#Работа с data frame
+#Working with Data Frame
 mtcars$even_gear <- 0
 mtcars$even_gear[c(mtcars$gear %% 2 != 1)] <- 1
 
@@ -36,7 +36,7 @@ mpg_4 <- mtcars$mpg[c(mtcars$cyl == 4)]
 mini_mtcars <- mtcars[c(3, 7, 10, 12, nrow(mtcars)),]
 
 
-#Элементы синтаксиса
+#Syntax elements
 mtcars$new_var <- ifelse(mtcars$carb >= 4 | mtcars$cyl > 6, 1, 0)
 
 
@@ -61,7 +61,7 @@ for(i in 1:135) {
 }
 
 
-#Описательные статистики
+#Descriptive statistics
 result <- mean(mtcars$qsec[mtcars$cyl != 3 & mtcars$mpg > 20])
 
 
@@ -89,7 +89,7 @@ fixed_vector <- replace(my_vector, is.na(my_vector), m)
 boxplot(Ozone ~ Month, airquality)
 
 
-#Описательные статистики. Графики
+#Descriptive statistics. Graphics
 plot1 <- ggplot(mtcars, aes(x = mpg, y = disp, color = hp))+geom_point()
 
 
@@ -100,13 +100,13 @@ ggplot(iris, aes(Sepal.Length)) + geom_histogram(aes(fill = Species))
 ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, col = Species, size = Petal.Length)) + geom_point()
 
 
-#Сохранение результатов
+#Saving results
 save(my_sd, file = "my_sd.RData")
 
 
-#############Вторая неделя#################
+##############Second week##################
 
-#Анализ номинативных данных 
+#Nominative data analysis
 red_men <- prop.table(HairEyeColor[ , ,'Male'], 2)['Red','Blue']
 
 
@@ -135,7 +135,7 @@ main_stat <- chisq.test(diamonds$factor_price, diamonds$factor_carat)$statistic
 fisher_test <- fisher.test(mtcars$am, mtcars$vs)$p.value
 
 
-#Сравнение двух групп 
+#Comparison of two groups
 vc <- ToothGrowth$len[ToothGrowth$supp == "VC" & ToothGrowth$dose == 2]
 oj <- ToothGrowth$len[ToothGrowth$supp == "OJ" & ToothGrowth$dose == 0.5]
 t_stat <- t.test(vc, oj)$statistic
@@ -155,7 +155,7 @@ df <- read.table("dataset_11504_16.txt")
 t.test(df$V1, df$V2)
 
 
-#Применение дисперсионного анализа
+#Application of analysis of variance
 fit <- aov(yield ~ N + P + N:P, data=npk)
 summary(fit)
 
@@ -200,7 +200,7 @@ ggplot(mydata, aes(x = store, y = price, color = origin, group = origin)) +
   theme_bw()
 
 
-#Создание собственных функций
+#Creating your own functions
 NA.position <- function(x){
   y <- which(is.na(x))
   return(y)
@@ -228,9 +228,9 @@ outliers.rm <- function(x){
 }
 
 
-#############Третья неделя#################
+###############Third week##################
 
-#Корреляция и простая линейная регрессия
+#Correlation and simple linear regression
 library(psych)
 corr.calc <- function(x){
   tst <- corr.test(x[1], x[2])
@@ -293,7 +293,7 @@ my_plot <- ggplot(iris, aes(Sepal.Width, Petal.Width, col = factor(Species)))+
   geom_smooth(method = "lm")
 
 
-#Множественная линейная регрессия
+#Multiple linear regression
 fill_na <- function(x){
   fit <- lm(y ~ x_1+x_2, data = x)
   x$y_full <- ifelse(is.na(x$y), predict(fit, x), x$y)
@@ -314,7 +314,7 @@ my_plot <- ggplot(mtcars, aes(x = wt, y = mpg, col = am)) +
   geom_smooth(method = 'lm')
 
 
-#Множественная линейная регрессия. Отбор моделей
+#Multiple linear regression. Models selection
 model_full <- lm(rating ~ ., data = attitude) 
 model_null <- lm(rating ~ 1, data = attitude)
 ideal_model <- step(model_full, scope = list(lower = model_null, upper = model_full), direction = 'backward')
@@ -330,7 +330,7 @@ model <- lm(sr ~ ., data = LifeCycleSavings)
 lm(rating ~ complaints*critical, attitude)
 
 
-#Диагностика модели
+#Model Diagnostics
 my_vector <- c(0.027, 0.079, 0.307, 0.098, 0.021, 0.091, 0.322, 0.211, 0.069, 0.261, 0.241, 0.166, 0.283, 0.041,
                0.369, 0.167, 0.001, 0.053, 0.262, 0.033, 0.457, 0.166, 0.344, 0.139, 0.162, 0.152, 0.107, 0.255, 
                0.037, 0.005, 0.042, 0.220, 0.283, 0.050, 0.194, 0.018, 0.291, 0.037, 0.085, 0.004, 0.265, 0.218, 
@@ -351,7 +351,7 @@ normality.test  <- function(x){
 }
 
 
-#Диагностика модели. Продолжение
+#Model Diagnostics. Continuation
 mydata <- read.csv(url("https://stepic.org/media/attachments/lesson/12088/homosc.csv"))
 x <- gvlma(DV ~ IV, data = mydata)
 summary(x)
@@ -361,7 +361,6 @@ resid.norm <- function(fit){
   res <- shapiro.test(fit$residuals)
   color <- ifelse(res$p.value<0.05, 'red', 'green')
   df <- data.frame(fit$residuals)
-  #names(df)[names(df) == 'fit.residuals'] <- 'res'
   return(ggplot(df, aes(fit.residuals))+
            geom_histogram(bins=30, fill=color))
 }
@@ -374,7 +373,7 @@ high.corr <- function(x){
 }
 
 
-#Логистическая регрессия
+#Logistic regression
 log_coef <- glm(am ~ disp + vs + mpg, mtcars, family = "binomial")$coefficients
 
 
@@ -400,7 +399,7 @@ result=ifelse(prob>=0.4, 1, 0)
 sum(result)
 
 
-#Экспорт результатов анализа из R
+#Exporting analysis results from R
 library(xtable)
 library(stargazer)
 
