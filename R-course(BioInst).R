@@ -60,6 +60,13 @@ for(i in 1:135) {
   moving_average[i] <- mean(AirPassengers[c(i:(i+9))])
 }
 
+#var w/ cumulative sum
+n <- 10    
+d <- AirPassengers    
+cx <- c(0, cumsum(d))    
+moving_average <- (cx[(n + 1):length(cx)] - cx[1:(length(cx) - n)]) / n
+
+
 
 #Descriptive statistics
 result <- mean(mtcars$qsec[mtcars$cyl != 3 & mtcars$mpg > 20])
