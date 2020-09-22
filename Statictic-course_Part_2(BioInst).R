@@ -93,3 +93,227 @@ obj <- ggplot(diamonds, aes(color)) +
 
 obj <- ggplot(diamonds, aes(x=color, fill=cut)) +
   geom_bar(position='dodge')
+
+
+##############Second week##################
+
+get_coefficients <- function(df) {
+  model <- glm(y ~ x, df, family = "binomial")
+  return(exp(model$coefficients))
+}
+
+test_data <- read.csv("https://stepik.org/media/attachments/course/524/test_data_01.csv")
+test_data  <- transform(test_data, x = factor(x), y = factor(y))
+get_coefficients(test_data)
+
+
+
+centered <- function(df, var_names) {
+  df[var_names] <- sapply(df[var_names], function(x) x - mean(x))  
+  
+  return(df)
+}
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/cen_data.csv")
+test_data
+
+var_names = c("X4", "X2", "X1")
+centered(test_data, var_names)
+
+
+
+get_features <- function(df) {
+  fit <- glm(df$is_prohibited ~ ., family="binomial", df)
+  result <- anova(fit, test = "Chisq")
+  features = rownames(result[which(result[,5] < 0.05),])
+  
+  if (length(features) > 0) {
+    return(features)
+  } else {
+    return('Prediction makes no sense')
+  }
+}
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/test_luggage_1.csv")
+str(test_data)
+get_features(test_data)
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/test_luggage_2.csv")
+str(test_data)
+get_features(test_data)
+
+
+
+most_suspicious <- function(train, test) {
+  model <- glm(train$is_prohibited ~ ., family="binomial", data=train)
+  result <- test[which.max(predict.glm(model, test)),][,5]
+  levels(result)[as.integer(result)]
+}
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/test_data_passangers.csv")
+str(test_data)
+
+data_for_predict <-read.csv("https://stepic.org/media/attachments/course/524/predict_passangers.csv")
+str(data_for_predict)
+
+most_suspicious(test_data, data_for_predict)
+
+
+
+normality_test <- function(df) {
+  unlist(sapply(df[sapply(df, is.numeric)], function(c) shapiro.test(c)$p.value))
+}
+
+normality_test(iris)
+
+test <- read.csv("https://stepic.org/media/attachments/course/524/test.csv")
+normality_test(test)
+
+
+
+smart_anova <- function(test){  
+  p_normal <- unlist(by(test[, 1], test[, 2], function(x) shapiro.test(x)$p.value))   
+  sd_equal <- bartlett.test(x ~ y, test)$p.value  
+  
+  if (all(p_normal > 0.05) & sd_equal > 0.05){    
+    fit <- aov(x ~ y, test)    
+    result <- c(ANOVA = summary(fit)[[1]]$'Pr(>F)'[1])    
+    
+    return(result)  
+  } else {    
+    fit <- kruskal.test(x ~ y, test)    
+    result <- c(KW = fit$p.value)    
+    
+    return(result)    
+  }    
+}
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/s_anova_test.csv")
+str(test_data)
+smart_anova(test_data)
+
+
+
+install.packages("dplyr")
+library(dplyr)
+    
+normality_by <- function(test_data){    
+  result <- test_data %>% group_by(y, z) %>%     
+    summarize(p_value = shapiro.test(x)$p.value)     
+  return(result)    
+}
+
+get_p_value <- function(x){      
+  shapiro.test(x)$p.value    
+}    
+normality_by <- function(test){    
+  grouped <- test %>%    
+    group_by_(.dots = colnames(.)[2:3]) %>%         
+    summarise_each(funs(get_p_value))         
+  names(grouped)[3] <- 'p_value'         
+  return(grouped)         
+}
+
+normality_by(mtcars[, c("mpg", "am", "vs")])
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/test_for_norm.csv")
+str(test_data)
+
+normality_by(test_data)
+
+
+
+obj <- ggplot(data=iris, aes(x=Sepal.Length, group=Species, fill=Species)) + geom_density(alpha=0.2)
+
+
+###############Third week##################
+
+smart_hclust <- function(df, n_clusters) {
+  dist_matrix <- dist(df)
+  model <- hclust(dist_matrix)
+  clusters <- cutree(model, n_clusters)
+  df['cluster'] = as.factor(clusters)
+  
+  df
+}
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/test_data_hclust.csv")
+str(test_data)
+smart_hclust(test_data, 3)
+
+
+
+get_difference <- function(test_data, n_cluster){    
+  dist_matrix <- dist(test_data)    
+  fit <- hclust(dist_matrix)    
+  test_data$cluster <- as.factor(cutree(fit, n_cluster))    
+  p_val <- sapply(test_data[,-ncol(test_data)], function(x) {summary(aov(x~cluster, test_data))[[1]][1,'Pr(>F)']})    
+  
+  return(names(p_val)[p_val < 0.05])    
+}
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/cluster_1.csv")
+get_difference(test_data, 2)
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/cluster_2.csv")
+get_difference(test_data, 2)
+
+
+
+get_pc <- function(test){    
+  fit <- prcomp(test)    
+  test<- cbind(test, fit$x[,1:2])    
+  
+  return(test)    
+}
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/pca_test.csv")
+test_data
+
+get_pc(test_data)
+
+
+
+get_pca2 <- function(df) {
+  fit = prcomp(df)
+  n_components = which(summary(fit)$importance['Cumulative Proportion',] > 0.9)[1]
+  df = cbind(df, fit$x[, 1:n_components])
+  df
+}
+
+fit <- prcomp(swiss)
+summary(fit)
+
+result  <- get_pca2(swiss)
+str(result)
+
+
+
+is_multicol <- function(df) {
+  positions <- subset(as.data.frame(which(abs(cor(df)) > 0.9999, arr.ind=TRUE)), row < col)
+  
+  if (nrow(positions) > 0) {
+    as.vector(sapply(positions, function(x) names(df)[x]))
+  } else {
+    "There is no collinearity in the data"
+  }
+}
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/Norris_1.csv")
+is_multicol(test_data)
+
+#V1 = V2 + 1
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/Norris_2.csv")
+is_multicol(test_data)
+
+#V1 = V2 + 1 ?? V3 = V4 - 2
+test_data <- read.csv("https://stepic.org/media/attachments/course/524/Norris_3.csv")
+is_multicol(test_data)
+
+
+
+dist_matrix <- dist(swiss)    
+fit <- hclust(dist_matrix)     
+swiss$cluster <- as.factor(cutree(fit, 2))    
+my_plot <- ggplot(swiss, aes(Education, Catholic, col = cluster)) + geom_point() + geom_smooth(method = 'lm')
+
